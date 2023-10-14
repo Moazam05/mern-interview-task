@@ -1,10 +1,12 @@
 const express = require("express");
 const morgan = require("morgan");
-const AppError = require("./utils/appError");
+const cors = require("cors");
 const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
+const AppError = require("./utils/appError");
 
 const app = express();
+app.use(cors());
 
 if (process.env.NODE_ENV === "development") {
 	app.use(morgan("dev"));
