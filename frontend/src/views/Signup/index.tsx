@@ -9,6 +9,7 @@ import { Heading, SubHeading } from "../../components/Heading";
 import PrimaryInput from "../../components/PrimaryInput";
 import { onKeyDown } from "../../utils";
 import Link from "next/link";
+import { useRegisterMutation } from "../../redux/api/authApiSlice";
 
 let passwordMessage =
 	"Password should contain minimum 8 characters, with a mix of uppercase letter, number, and symbol.";
@@ -56,6 +57,8 @@ const Signup = () => {
 		setConfirmPasswordShow(!confirmPasswordShow);
 	};
 
+	const [registerUser, { isLoading: registeringUser }] = useRegisterMutation();
+
 	const SignUpHandler = async (data: IsSignUpForm) => {
 		const payload = {
 			fullName: data.fullName,
@@ -64,7 +67,11 @@ const Signup = () => {
 			passwordConfirm: data.passwordConfirm,
 		};
 
-		console.log("payload", payload);
+		const user = await registerUser({
+			body: payload,
+		});
+
+		console.log("api response", user);
 	};
 
 	return (

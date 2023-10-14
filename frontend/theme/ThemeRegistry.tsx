@@ -2,6 +2,8 @@
 
 import { createTheme, ThemeOptions, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { Provider } from "react-redux";
+import { store } from "../src/redux/store";
 
 const themeOptions: ThemeOptions = {
 	typography: {
@@ -17,9 +19,11 @@ export default function ThemeRegistry({
 	children: React.ReactNode;
 }) {
 	return (
-		<ThemeProvider theme={theme}>
-			<CssBaseline />
-			{children}
-		</ThemeProvider>
+		<Provider store={store}>
+			<ThemeProvider theme={theme}>
+				<CssBaseline />
+				{children}
+			</ThemeProvider>
+		</Provider>
 	);
 }
