@@ -55,8 +55,9 @@ exports.signup = catchAsync(async (req, res, next) => {
 	};
 
 	const token = signToken(newUser.id);
-
 	userList.push(newUser);
+
+	console.log("userList", userList);
 
 	res.status(201).json({
 		status: "success",

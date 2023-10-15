@@ -1,4 +1,5 @@
 import { Box, Button } from "@mui/material";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import React, { useState } from "react";
 import NextWhiteLogo from "../../../public/nexCenterLogo.svg";
@@ -10,6 +11,7 @@ import PrimaryInput from "../../components/PrimaryInput";
 import { onKeyDown } from "../../utils";
 import Link from "next/link";
 import { useRegisterMutation } from "../../redux/api/authApiSlice";
+import ToastAlert from "../../components/Toast";
 
 let passwordMessage =
 	"Password should contain minimum 8 characters, with a mix of uppercase letter, number, and symbol.";
@@ -42,6 +44,14 @@ const Signup = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [confirmPasswordShow, setConfirmPasswordShow] = useState(false);
 
+	const router = useRouter();
+
+	const [toast, setToast] = useState({
+		message: "",
+		appearence: false,
+		type: "",
+	});
+
 	const [formValues, setFormValues] = useState<IsSignUpForm>({
 		fullName: "",
 		email: "",
@@ -57,21 +67,42 @@ const Signup = () => {
 		setConfirmPasswordShow(!confirmPasswordShow);
 	};
 
+	const handleCloseToast = () => {
+		setToast({ ...toast, appearence: false });
+	};
+
 	const [registerUser, { isLoading: registeringUser }] = useRegisterMutation();
 
 	const SignUpHandler = async (data: IsSignUpForm) => {
 		const payload = {
-			fullName: data.fullName,
+			name: data.fullName,
 			email: data.email,
 			password: data.password,
 			passwordConfirm: data.passwordConfirm,
 		};
 
-		const user = await registerUser({
+		const user: any = await registerUser({
 			body: payload,
 		});
 
-		console.log("api response", user);
+		if (user?.data?.status) {
+			setToast({
+				...toast,
+				message: "Account Created Successfully!",
+				appearence: true,
+				type: "success",
+			});
+			router.push("/login");
+		}
+
+		if (user?.error) {
+			setToast({
+				...toast,
+				message: user?.error?.data?.message,
+				appearence: true,
+				type: "error",
+			});
+		}
 	};
 
 	return (
@@ -320,6 +351,7 @@ const Signup = () => {
 													<Button
 														type="submit"
 														variant="contained"
+														disabled={registeringUser}
 														sx={{
 															padding: "5px 30px",
 															textTransform: "capitalize",
@@ -336,6 +368,13 @@ const Signup = () => {
 					</Box>
 				</Box>
 			</Box>
+
+			<ToastAlert
+				appearence={toast.appearence}
+				type={toast.type}
+				message={toast.message}
+				handleClose={handleCloseToast}
+			/>
 		</>
 	);
 };

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Box, Button } from "@mui/material";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import BottomLogo from "../../../public/bottomLogo.svg";
 import { Heading, SubHeading } from "../../components/Heading";
@@ -9,6 +10,8 @@ import { onKeyDown } from "../../utils";
 import * as Yup from "yup";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import Link from "next/link";
+import { useLoginMutation } from "../../redux/api/authApiSlice";
+import ToastAlert from "../../components/Toast";
 
 interface ISLoginForm {
 	email: string;
@@ -31,9 +34,23 @@ const Login = () => {
 		password: "",
 	});
 
+	const router = useRouter();
+
+	const [toast, setToast] = useState({
+		message: "",
+		appearence: false,
+		type: "",
+	});
+
 	const hideShowPassword = () => {
 		setShowPassword(!showPassword);
 	};
+
+	const handleCloseToast = () => {
+		setToast({ ...toast, appearence: false });
+	};
+
+	const [LoginUser, { isLoading: loadingLoginUser }] = useLoginMutation();
 
 	const LoginHandler = async (data: ISLoginForm) => {
 		const payload = {
@@ -41,7 +58,40 @@ const Login = () => {
 			password: data.password,
 		};
 
-		console.log("payload", payload);
+		try {
+			const user: any = await LoginUser({
+				body: payload,
+			});
+
+			console.log("user", user?.data);
+
+			if (user?.data?.status) {
+				setToast({
+					...toast,
+					message: `Welcome ${user?.data?.data?.user?.name}!`,
+					appearence: true,
+					type: "success",
+				});
+				localStorage.setItem("user", JSON.stringify(user?.data));
+				router.push("/");
+			}
+
+			if (user?.error) {
+				setToast({
+					...toast,
+					message: user?.error?.data?.message,
+					appearence: true,
+					type: "error",
+				});
+			}
+		} catch (error) {
+			setToast({
+				...toast,
+				message: "Something went wrong!",
+				appearence: true,
+				type: "error",
+			});
+		}
 	};
 
 	return (
@@ -259,6 +309,12 @@ const Login = () => {
 					</Box>
 				</Box>
 			</Box>
+			<ToastAlert
+				appearence={toast.appearence}
+				type={toast.type}
+				message={toast.message}
+				handleClose={handleCloseToast}
+			/>
 		</>
 	);
 };
