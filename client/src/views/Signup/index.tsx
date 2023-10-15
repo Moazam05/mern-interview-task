@@ -1,57 +1,38 @@
-import { Box, Button } from "@mui/material";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+// React Imports
 import React, { useState } from "react";
-import NextWhiteLogo from "../../../public/nexCenterLogo.svg";
-import * as Yup from "yup";
+// Next Imports
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+// MUI Imports
+import { Box, Button } from "@mui/material";
+// Formik
 import { Form, Formik, FormikProps } from "formik";
+// MUI Icons
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+// Utils
+import { onKeyDown } from "../../utils";
+// Redux API
+import { useRegisterMutation } from "../../redux/api/authApiSlice";
+// Custom
 import { Heading, SubHeading } from "../../components/Heading";
 import PrimaryInput from "../../components/PrimaryInput";
-import { onKeyDown } from "../../utils";
-import Link from "next/link";
-import { useRegisterMutation } from "../../redux/api/authApiSlice";
 import ToastAlert from "../../components/Toast";
-
-let passwordMessage =
-	"Password should contain minimum 8 characters, with a mix of uppercase letter, number, and symbol.";
-
-interface IsSignUpForm {
-	fullName: string;
-	email: string;
-	password: string;
-	passwordConfirm: string;
-}
-
-const SignUpSchema = Yup.object().shape({
-	fullName: Yup.string().required("Full name is required").nullable(),
-	email: Yup.string()
-		.email("Invalid email address")
-		.required("Email is required")
-		.nullable(),
-	password: Yup.string()
-		.required(passwordMessage)
-		.min(8, passwordMessage)
-		.matches(/[@$!%*?&]/, passwordMessage)
-		.matches(/\d/, passwordMessage)
-		.matches(/[A-Z]/, passwordMessage),
-	passwordConfirm: Yup.string()
-		.required("Passwords do not match.")
-		.oneOf([Yup.ref("password")], "Passwords do not match."),
-});
+import { SignUpSchema } from "./Components/validationSchema";
+import { IsSignUpForm } from "./Components/typeInterface";
+// Images
+import NextWhiteLogo from "../../../public/nexCenterLogo.svg";
 
 const Signup = () => {
-	const [showPassword, setShowPassword] = useState(false);
-	const [confirmPasswordShow, setConfirmPasswordShow] = useState(false);
-
 	const router = useRouter();
 
+	const [showPassword, setShowPassword] = useState(false);
+	const [confirmPasswordShow, setConfirmPasswordShow] = useState(false);
 	const [toast, setToast] = useState({
 		message: "",
 		appearence: false,
 		type: "",
 	});
-
 	const [formValues, setFormValues] = useState<IsSignUpForm>({
 		fullName: "",
 		email: "",
@@ -81,24 +62,33 @@ const Signup = () => {
 			passwordConfirm: data.passwordConfirm,
 		};
 
-		const user: any = await registerUser({
-			body: payload,
-		});
-
-		if (user?.data?.status) {
-			setToast({
-				...toast,
-				message: "Account Created Successfully!",
-				appearence: true,
-				type: "success",
+		try {
+			const user: any = await registerUser({
+				body: payload,
 			});
-			router.push("/login");
-		}
 
-		if (user?.error) {
+			if (user?.data?.status) {
+				setToast({
+					...toast,
+					message: "Account Created Successfully!",
+					appearence: true,
+					type: "success",
+				});
+				router.push("/login");
+			}
+
+			if (user?.error) {
+				setToast({
+					...toast,
+					message: user?.error?.data?.message,
+					appearence: true,
+					type: "error",
+				});
+			}
+		} catch (error) {
 			setToast({
 				...toast,
-				message: user?.error?.data?.message,
+				message: "Something went wrong",
 				appearence: true,
 				type: "error",
 			});

@@ -109,7 +109,6 @@ const PrimaryInput: React.FC<PrimaryInputProps> = ({
 					background: "#fff",
 					height: multiline ? "auto" : "50px",
 					border: "none",
-					// boxShadow: error ? '0px 0px 5px rgb(246, 70, 70, .9)' : 'none',
 				},
 				readOnly: readOnly,
 				startAdornment: startAdornment ? (

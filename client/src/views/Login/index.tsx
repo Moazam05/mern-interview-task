@@ -1,41 +1,36 @@
+// React Imports
 import React, { useState } from "react";
-import { Box, Button } from "@mui/material";
+// Next Imports
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
+// MUI Imports
+import { Box, Button } from "@mui/material";
+// MUI Icons
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+// Images
 import BottomLogo from "../../../public/bottomLogo.svg";
+// Formik
+import { Form, Formik, FormikProps } from "formik";
+// Utils
+import { onKeyDown } from "../../utils";
+// Redux
+import { useLoginMutation } from "../../redux/api/authApiSlice";
+// Custom
 import { Heading, SubHeading } from "../../components/Heading";
 import PrimaryInput from "../../components/PrimaryInput";
-import { Form, Formik, FormikProps } from "formik";
-import { onKeyDown } from "../../utils";
-import * as Yup from "yup";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import Link from "next/link";
-import { useLoginMutation } from "../../redux/api/authApiSlice";
 import ToastAlert from "../../components/Toast";
-
-interface ISLoginForm {
-	email: string;
-	password: string;
-}
-
-const loginSchema = Yup.object().shape({
-	email: Yup.string()
-		.email("Invalid email address")
-		.required("Email is required")
-		.nullable(),
-	password: Yup.string().required("Password is required").nullable(),
-});
+import { loginSchema } from "./Components/validationSchema";
+import { ISLoginForm } from "./Components/typeInterface";
 
 const Login = () => {
-	const [showPassword, setShowPassword] = useState(false);
+	const router = useRouter();
 
+	const [showPassword, setShowPassword] = useState(false);
 	const [formValues, setFormValues] = useState<ISLoginForm>({
 		email: "",
 		password: "",
 	});
-
-	const router = useRouter();
-
 	const [toast, setToast] = useState({
 		message: "",
 		appearence: false,
@@ -62,8 +57,6 @@ const Login = () => {
 			const user: any = await LoginUser({
 				body: payload,
 			});
-
-			console.log("user", user?.data);
 
 			if (user?.data?.status) {
 				setToast({
@@ -242,6 +235,7 @@ const Login = () => {
 													<Button
 														type="submit"
 														variant="contained"
+														disabled={loadingLoginUser}
 														sx={{
 															padding: "5px 30px",
 															textTransform: "capitalize",
