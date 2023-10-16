@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { promisify } = require("util");
 // Custom Imports
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
@@ -98,4 +99,39 @@ exports.login = catchAsync(async (req, res, next) => {
 			user,
 		},
 	});
+});
+
+exports.protect = catchAsync(async (req, res, next) => {
+	let token;
+	if (
+		req.headers.authorization &&
+		req.headers.authorization.startsWith("Bearer")
+	) {
+		token = req.headers.authorization.split(" ")[1];
+	}
+
+	if (!token) {
+		return next(
+			new AppError("You are not logged in! Please log in to get access.", 401)
+		);
+	}
+
+	// 2) Verification token
+	const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+	// 3) Check if user still exists
+	const freshUser = await userList.find((user) => user.id === decode.id);
+
+	if (!freshUser) {
+		return next(
+			new AppError(
+				"The user belonging to this token does no longer exist.",
+				401
+			)
+		);
+	}
+
+	// GRANT ACCESS TO PROTECTED ROUTE
+	req.user = freshUser;
+	next();
 });
