@@ -4,6 +4,7 @@ const cors = require("cors");
 // Custom Imports
 const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
+const countryRouter = require("./routes/countryRoutes");
 const AppError = require("./utils/appError");
 
 const app = express();
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 
 // ROUTES
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/country", countryRouter);
 
 app.all("*", (req, res, next) => {
 	next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
