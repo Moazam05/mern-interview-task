@@ -1,5 +1,7 @@
 // React Imports
 import React, { useState } from "react";
+// React Redux
+import { useDispatch } from "react-redux";
 // Next Imports
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -14,7 +16,7 @@ import BottomLogo from "../../../public/bottomLogo.svg";
 import { Form, Formik, FormikProps } from "formik";
 // Utils
 import { onKeyDown } from "../../utils";
-// Redux
+// Redux API
 import { useLoginMutation } from "../../redux/api/authApiSlice";
 // Custom
 import { Heading, SubHeading } from "../../components/Heading";
@@ -22,9 +24,11 @@ import PrimaryInput from "../../components/PrimaryInput";
 import ToastAlert from "../../components/Toast";
 import { loginSchema } from "./Components/validationSchema";
 import { ISLoginForm } from "./Components/typeInterface";
+import { setUser } from "../../redux/authSlice/authSlice";
 
 const Login = () => {
 	const router = useRouter();
+	const dispatch = useDispatch();
 
 	const [showPassword, setShowPassword] = useState(false);
 	const [formValues, setFormValues] = useState<ISLoginForm>({
@@ -59,13 +63,9 @@ const Login = () => {
 			});
 
 			if (user?.data?.status) {
-				setToast({
-					...toast,
-					message: `Welcome ${user?.data?.data?.user?.name}!`,
-					appearence: true,
-					type: "success",
-				});
 				localStorage.setItem("user", JSON.stringify(user?.data));
+				dispatch(setUser(user?.data));
+
 				router.push("/");
 			}
 

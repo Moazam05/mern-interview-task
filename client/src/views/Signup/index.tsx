@@ -68,12 +68,6 @@ const Signup = () => {
 			});
 
 			if (user?.data?.status) {
-				setToast({
-					...toast,
-					message: "Account Created Successfully!",
-					appearence: true,
-					type: "success",
-				});
 				router.push("/login");
 			}
 
