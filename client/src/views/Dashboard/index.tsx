@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Button } from "@mui/material";
 import { Heading, SubHeading } from "../../components/Heading";
 import { useSelector } from "react-redux";
-import { Form, Formik, FormikProps } from "formik";
+import { Form, Formik } from "formik";
 import { CarSchema } from "./Components/validationSchema";
 import { onKeyDown } from "../../utils";
 import PrimaryInput from "@/src/components/PrimaryInput";
@@ -12,6 +12,8 @@ import SelectInput from "../..//components/SelectInput";
 import { cityTypes, noOfCopiesTypes } from "../../utils/StaticValues";
 import Errors from "../../components/Error";
 import RadioGroupField from "../../components/RadioGroup";
+import { useCreateCarMutation } from "../../redux/api/carApiSlice";
+import ToastAlert from "../../components/Toast";
 
 const Dashboard = () => {
   // Redux
@@ -23,16 +25,76 @@ const Dashboard = () => {
     phoneNumber: "",
     city: "Lahore",
     noOfCopy: "",
+    files: null,
   });
 
-  const CarHandler = async (data: ISCarForm) => {
-    const payload = {
-      carModel: data.carModel,
-      price: data.price,
-      phoneNumber: data.phoneNumber,
-    };
+  const [toast, setToast] = useState({
+    message: "",
+    appearence: false,
+    type: "",
+  });
 
-    console.log("payload", payload);
+  const handleCloseToast = () => {
+    setToast({ ...toast, appearence: false });
+  };
+
+  const [CreateCar, { isLoading: loadingCreateCar }] = useCreateCarMutation();
+
+  const CarHandler = async (data: ISCarForm) => {
+    if (data.files) {
+      const imageNames = Array.from(data.files).map((file) => file.name);
+
+      const payload = {
+        carModel: data.carModel,
+        price: data.price,
+        phoneNumber: data.phoneNumber,
+        maxPictures: data.noOfCopy,
+        city: data.city,
+        images: imageNames,
+      };
+
+      try {
+        const car: any = await CreateCar({
+          body: payload,
+        });
+
+        if (car?.data?.status) {
+          setToast({
+            ...toast,
+            message: "Car Successfully Added!",
+            appearence: true,
+            type: "success",
+          });
+
+          // Reset form values after successful submission
+          setFormValues({
+            carModel: "",
+            price: "",
+            phoneNumber: "",
+            city: "Lahore",
+            noOfCopy: "",
+            files: null,
+          });
+        }
+
+        if (car?.error) {
+          setToast({
+            ...toast,
+            message: car?.error?.data?.message,
+            appearence: true,
+            type: "error",
+          });
+        }
+      } catch (error) {
+        console.log("Error 🔥", error);
+        setToast({
+          ...toast,
+          message: "Something went wrong!",
+          appearence: true,
+          type: "error",
+        });
+      }
+    }
   };
 
   return (
@@ -92,9 +154,14 @@ const Dashboard = () => {
               validationSchema={CarSchema}
             >
               {(props: FormikProps<ISCarForm>) => {
-                const { values, touched, errors, handleBlur, handleChange } =
-                  props;
-
+                const {
+                  values,
+                  touched,
+                  errors,
+                  handleBlur,
+                  handleChange,
+                  setFieldValue,
+                } = props;
                 return (
                   <Form onKeyDown={onKeyDown}>
                     <Box sx={{ marginBottom: "10px" }}>
@@ -150,7 +217,14 @@ const Dashboard = () => {
                       />
                     </Box>
                     <Box
-                      sx={{ display: "flex", justifyContent: "space-between" }}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginTop:
+                          errors.phoneNumber && touched.phoneNumber
+                            ? "25px"
+                            : "10px",
+                      }}
                     >
                       <Box sx={{ marginBottom: "10px" }}>
                         <SubHeading sx={{ marginBottom: "5px" }}>
@@ -203,6 +277,47 @@ const Dashboard = () => {
                         </SelectInput>
                       </Box>
                     </Box>
+                    <Box sx={{ marginBottom: "10px" }}>
+                      <SubHeading sx={{ marginBottom: "5px" }}>
+                        Car Images
+                      </SubHeading>
+                      <input
+                        type="file"
+                        name="files"
+                        onChange={(event) => {
+                          const fileList: any = event.currentTarget.files;
+                          const filesArray = Array.from(fileList);
+                          setFieldValue("files", filesArray);
+                        }}
+                        accept="image/*"
+                        multiple
+                      />
+                      {touched.files && errors.files && (
+                        <Errors
+                          sx={{
+                            fontSize: "12px",
+                            color: "#d32f2f",
+                            margin: "3px 0",
+                          }}
+                        >
+                          {errors.files}
+                        </Errors>
+                      )}
+                      {values.files && values.files.length > 0 && (
+                        <Box sx={{ margin: "10px 0" }}>
+                          <SubHeading sx={{ marginBottom: "5px" }}>
+                            File names
+                          </SubHeading>
+                          <Box sx={{ padding: "0 20px" }}>
+                            <ul>
+                              {values.files.map((file: any, index: any) => (
+                                <li key={index}>{file.name} </li>
+                              ))}
+                            </ul>
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
                     <Box
                       sx={{
                         display: "flex",
@@ -213,13 +328,13 @@ const Dashboard = () => {
                       <Button
                         type="submit"
                         variant="contained"
-                        //   disabled={loadingLoginUser}
+                        disabled={loadingCreateCar}
                         sx={{
                           padding: "5px 30px",
                           textTransform: "capitalize",
                         }}
                       >
-                        Add Car
+                        {loadingCreateCar ? "Adding Car..." : "Add Car"}
                       </Button>
                     </Box>
                   </Form>
@@ -229,6 +344,12 @@ const Dashboard = () => {
           </Box>
         </Box>
       </Box>
+      <ToastAlert
+        appearence={toast.appearence}
+        type={toast.type}
+        message={toast.message}
+        handleClose={handleCloseToast}
+      />
     </>
   );
 };

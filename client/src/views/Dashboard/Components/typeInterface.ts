@@ -4,4 +4,5 @@ export interface ISCarForm {
   phoneNumber: string;
   city: string;
   noOfCopy: string;
+  files: FileList | null;
 }
