@@ -65,6 +65,7 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
+  // 1) Getting token and check of it's there
   let token;
   if (
     req.headers.authorization &&
@@ -83,8 +84,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   // 3) Check if user still exists
-  const freshUser = await userList.find((user) => user.id === decode.id);
-
+  const freshUser = await User.findById(decode.id);
   if (!freshUser) {
     return next(
       new AppError(
