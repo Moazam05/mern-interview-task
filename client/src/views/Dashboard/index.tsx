@@ -40,7 +40,7 @@ const Dashboard = () => {
 
   const [CreateCar, { isLoading: loadingCreateCar }] = useCreateCarMutation();
 
-  const CarHandler = async (data: ISCarForm) => {
+  const CarHandler = async (data: ISCarForm, resetForm: any) => {
     if (data.files) {
       const imageNames = Array.from(data.files).map((file) => file.name);
 
@@ -59,21 +59,18 @@ const Dashboard = () => {
         });
 
         if (car?.data?.status) {
+          // Reset form values after successful submission
+          resetForm();
+          // Manually clear the file input
+          const fileInput: any = document.querySelector('input[type="file"]');
+          if (fileInput) {
+            fileInput.value = "";
+          }
           setToast({
             ...toast,
             message: "Car Successfully Added!",
             appearence: true,
             type: "success",
-          });
-
-          // Reset form values after successful submission
-          setFormValues({
-            carModel: "",
-            price: "",
-            phoneNumber: "",
-            city: "Lahore",
-            noOfCopy: "",
-            files: null,
           });
         }
 
@@ -148,8 +145,8 @@ const Dashboard = () => {
           >
             <Formik
               initialValues={formValues}
-              onSubmit={(values: ISCarForm) => {
-                CarHandler(values);
+              onSubmit={(values: ISCarForm, { resetForm }) => {
+                CarHandler(values, resetForm);
               }}
               validationSchema={CarSchema}
             >

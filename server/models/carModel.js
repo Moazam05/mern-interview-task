@@ -6,6 +6,7 @@ const carSchema = new mongoose.Schema(
     carModel: {
       type: String,
       required: [true, "Car Model can not be empty!"],
+      unique: true,
       trim: true,
       minlength: [3, "A car name must have more or equal then 3 characters"],
       maxlength: [40, "A car name must have less or equal then 40 characters"],
