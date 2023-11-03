@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Button } from "@mui/material";
 import { Heading, SubHeading } from "../../components/Heading";
 import { useSelector } from "react-redux";
-import { Form, Formik } from "formik";
+import { Form, Formik, FormikProps } from "formik";
 import { CarSchema } from "./Components/validationSchema";
 import { onKeyDown } from "../../utils";
 import PrimaryInput from "@/src/components/PrimaryInput";
@@ -14,10 +14,13 @@ import Errors from "../../components/Error";
 import RadioGroupField from "../../components/RadioGroup";
 import { useCreateCarMutation } from "../../redux/api/carApiSlice";
 import ToastAlert from "../../components/Toast";
+import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
   // Redux
   const name = useSelector((state: any) => state?.auth?.user?.data?.user?.name);
+  const router = useRouter();
+
   // States
   const [formValues, setFormValues] = useState<ISCarForm>({
     carModel: "",
@@ -107,7 +110,7 @@ const Dashboard = () => {
       >
         Welcome{" "}
         <span style={{ padding: "0 5px", fontWeight: "bold" }}>
-          {name.toUpperCase()}
+          {name && name.toUpperCase()}
         </span>
       </Heading>
 
@@ -124,14 +127,33 @@ const Dashboard = () => {
             width: "40%",
           }}
         >
-          <Heading
+          <Box
             sx={{
-              fontSize: "35px",
-              marginBottom: "15px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            Car Registration
-          </Heading>
+            <Heading
+              sx={{
+                fontSize: "35px",
+                marginBottom: "15px",
+              }}
+            >
+              Car Registration
+            </Heading>
+            <Box>
+              <Button
+                onClick={() => {
+                  router.push("/all-cars");
+                }}
+                variant="outlined"
+                sx={{ textTransform: "capitalize" }}
+              >
+                Cars List
+              </Button>
+            </Box>
+          </Box>
           <Box
             sx={{
               boxShadow: "0px 0px 33px 0px rgba(0,0,0,0.1)",

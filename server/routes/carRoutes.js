@@ -6,11 +6,12 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(authController.protect, carController.getAllCars)
   .post(
     authController.protect,
     carController.setCarUserIds,
     carController.createCar
   );
+
+router.route("/:id").get(carController.getCars);
 
 module.exports = router;

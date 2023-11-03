@@ -8,15 +8,20 @@ export const carApiSlice = apiSlice.injectEndpoints({
           url: `cars`,
           method: "POST",
           body: data.body,
-          // headers: {
-          //   "Content-Type": "application/json",
-          //   Accept: "application/json",
-          //   "Access-Control-Allow-Origin": "*",
-          // },
         };
       },
+      invalidatesTags: ["Cars"],
+    }),
+    getAllCars: builder.query({
+      query: (data) => {
+        return {
+          url: `cars`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Cars"],
     }),
   }),
 });
 
-export const { useCreateCarMutation } = carApiSlice;
+export const { useCreateCarMutation, useGetAllCarsQuery } = carApiSlice;
