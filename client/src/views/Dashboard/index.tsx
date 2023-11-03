@@ -45,7 +45,7 @@ const Dashboard = () => {
 
   const CarHandler = async (data: ISCarForm, resetForm: any) => {
     if (data.files) {
-      const imageNames = Array.from(data.files).map((file) => file.name);
+      const imageNames = Array.from(data.files).map((file: any) => file.name);
 
       const payload = {
         carModel: data.carModel,
