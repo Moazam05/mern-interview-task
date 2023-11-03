@@ -7,12 +7,17 @@ import { useRouter } from "next/navigation";
 import { useGetAllCarsQuery } from "../../redux/api/carApiSlice";
 
 const AllCars = () => {
+  const router = useRouter();
   // Redux
   const name = useSelector((state: any) => state?.auth?.user?.data?.user?.name);
-  const router = useRouter();
+  const userId = useSelector(
+    (state: any) => state?.auth?.user?.data?.user?._id
+  );
 
   const { data: allCarsData, isLoading: allCarsDataLoading } =
-    useGetAllCarsQuery({});
+    useGetAllCarsQuery({
+      userId,
+    });
 
   return (
     <>
@@ -71,48 +76,76 @@ const AllCars = () => {
               </Button>
             </Box>
           </Box>
+          {allCarsData?.data?.data?.length === 0 ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "5px",
+                marginBottom: "10px",
+              }}
+            >
+              No Cars Added Yet!
+            </Box>
+          ) : (
+            <>
+              {allCarsData?.data?.data?.map((car: any, index: string) => (
+                <div key={car._id}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                      padding: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Box>Car Model</Box>
+                      <Box>{car.carModel}</Box>
+                    </Box>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Box>Price</Box>
+                      <Box>$ {car.price}</Box>
+                    </Box>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Box>City</Box>
+                      <Box>{car.city}</Box>
+                    </Box>
 
-          {allCarsData?.data?.data?.map((car: any, index: string) => (
-            <div key={car._id}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                  padding: "10px",
-                  border: "1px solid #ccc",
-                  borderRadius: "5px",
-                  marginBottom: "10px",
-                }}
-              >
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Box>Car Model</Box>
-                  <Box>{car.carModel}</Box>
-                </Box>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Box>Price</Box>
-                  <Box>$ {car.price}</Box>
-                </Box>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Box>City</Box>
-                  <Box>{car.city}</Box>
-                </Box>
-
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Box>Phone Number</Box>
-                  <Box>{car.phoneNumber}</Box>
-                </Box>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Box>Total Images</Box>
-                  <Box>{car.maxPictures}</Box>
-                </Box>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Box>Images</Box>
-                  <Box>{car.images?.join(" | ")}</Box>
-                </Box>
-              </Box>
-            </div>
-          ))}
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Box>Phone Number</Box>
+                      <Box>{car.phoneNumber}</Box>
+                    </Box>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Box>Total Images</Box>
+                      <Box>{car.maxPictures}</Box>
+                    </Box>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Box>Images</Box>
+                      <Box>{car.images?.join(" | ")}</Box>
+                    </Box>
+                  </Box>
+                </div>
+              ))}
+            </>
+          )}
         </Box>
       </Box>
     </>

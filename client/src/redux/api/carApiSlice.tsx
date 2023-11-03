@@ -15,7 +15,7 @@ export const carApiSlice = apiSlice.injectEndpoints({
     getAllCars: builder.query({
       query: (data) => {
         return {
-          url: `cars`,
+          url: `cars/${data.userId}`,
           method: "GET",
         };
       },
