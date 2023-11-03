@@ -8,4 +8,5 @@ exports.setCarUserIds = (req, res, next) => {
   next();
 };
 
+exports.getAllCars = factory.getAll(Car);
 exports.createCar = factory.createOne(Car);
